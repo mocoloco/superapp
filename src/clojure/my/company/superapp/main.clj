@@ -41,7 +41,7 @@
                     ;; calling static method way 1: (This hang the connection so nothing is being return "empty reponse)
                     ;; (.newFixedLengthResponse NanoHTTPD (str msg "</body></html>\n"))
                     ;; calling static method way 2: (This cause the application to crash
-                    (NanoHTTPD/newFixedLengthResponse "This is a test")
+                    (NanoHTTPD/newFixedLengthResponse (str msg "</body></html>\n"))
                     )
                   )
                 )]
