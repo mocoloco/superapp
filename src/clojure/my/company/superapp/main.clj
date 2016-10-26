@@ -33,15 +33,23 @@
   [bind-address port]
   (let [httpd (proxy [NanoHTTPD] [bind-address port]
                 (serve [session]
-                  (let [msg "<html><body><h1>Hello server</h1>\n"]
-                    (log/i "trying to response the server..." :tag "my.company.superapp.main")
+                  (let [msg "<html><body><h1>Hello from server!</h1>\n<h2>Session info:</h2>"
+                        uri (.getUri session)
+                        method (.getMethod session)
+                        headers (.getHeaders session)]
+                    (log/i "Session info:")
+                    (log/i (str "URI: " uri))
+                    (log/i (str "Method: " method))
+                    (log/i (str "Headers: " headers))
                     ;; Testing what happends when I raise an exception: 
                     ;; Same HTTP error as I get when calling: newFixedLegthReponse
                     ;; (throw (Exception. "my exception message"))
-                    ;; calling static method way 1: (This hang the connection so nothing is being return "empty reponse)
                     ;; (.newFixedLengthResponse NanoHTTPD (str msg "</body></html>\n"))
                     ;; calling static method way 2: (This cause the application to crash
-                    (NanoHTTPD/newFixedLengthResponse (str msg "</body></html>\n"))
+                    (NanoHTTPD/newFixedLengthResponse (str msg "<h3>URI: " uri "</h3>\n" 
+                                                           "<h3>METHOD: " method "</h3>\n" 
+                                                           "<h3>HEADERS: " headers "</h3>\n" 
+                                                           "</body></html>\n"))
                     )
                   )
                 )]
@@ -50,7 +58,7 @@
   )
 
 ;;Define httpd instance as a global variable
-(def httpd (init-httpd "0.0.0.0" 5555))
+(def httpd (init-httpd "0.0.0.0" 5557))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
@@ -61,7 +69,7 @@
   (onCreate [this bundle]
     (.superOnCreate this bundle)
     (toast "starting HTTPD server..." :long)
-    (log/i "staring httpd server logging")
+    (log/i "staring httpd server")
     (.start httpd)
     (neko.debug/keep-screen-on this)
     (on-ui
