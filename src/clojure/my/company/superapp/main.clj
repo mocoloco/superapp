@@ -78,7 +78,10 @@
                                     (log/i "onException")))]
                   web-socket) 
                 )
-              )]))
+              )]
+    wsd
+    )
+)
 
 ;;Define httpd and wsg instances as a global variables
 (def httpd (init-httpd "0.0.0.0" 5557))
