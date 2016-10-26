@@ -13,7 +13,8 @@
 
   :dependencies [[org.clojure-android/clojure "1.7.0-r4"]
                  [neko/neko "4.0.0-alpha5"]
-                 [org.nanohttpd/nanohttpd "2.3.1"]]
+                 [org.nanohttpd/nanohttpd "2.3.1"]
+                 [org.nanohttpd/nanohttpd-websocket "2.3.1"]]
   :profiles {:default [:dev]
 
              :dev

@@ -10,6 +10,8 @@
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
+             fi.iki.elonen.NanoWSD
+             fi.iki.elonen.NanoWSD$WebSocket
              ;; fi.iki.elonen.response.Response
              ;; org.apache.http.client.HttpClient
              ))
@@ -57,8 +59,30 @@
     )
   )
 
-;;Define httpd instance as a global variable
+(defn init-wsd 
+  [bind-address port]
+  (let [wsd (proxy [NanoWSD] [bind-address port]
+              (openWebSocket 
+                [handshake]
+                (log/i "openWebSocket")
+                (let [web-socket (proxy [NanoWSD$WebSocket] [handshake]
+                                   (onOpen []
+                                     (log/i "onOpen"))
+                                   (onClose [code, reason, initiated-by-remote]
+                                     (log/i "onClose"))
+                                   (onMessage [message]
+                                     (log/i "onMessage"))
+                                   (onPong [pong]
+                                     (log/i "onPong"))
+                                   (onException [exception]
+                                    (log/i "onException")))]
+                  web-socket) 
+                )
+              )]))
+
+;;Define httpd and wsg instances as a global variables
 (def httpd (init-httpd "0.0.0.0" 5557))
+(def wsd (init-wsd "0.0.0.0" 5558))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
@@ -71,6 +95,8 @@
     (toast "starting HTTPD server..." :long)
     (log/i "staring httpd server")
     (.start httpd)
+    (log/i "starting wsd server")
+    (.start wsd)
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
