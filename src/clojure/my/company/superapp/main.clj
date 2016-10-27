@@ -59,6 +59,8 @@
     )
   )
 
+(def wsd-sessions (atom {}))
+
 (defn init-wsd 
   [bind-address port]
   (let [wsd (proxy [NanoWSD] [bind-address port]
@@ -67,7 +69,8 @@
                 (log/i "openWebSocket")
                 (let [web-socket (proxy [NanoWSD$WebSocket] [handshake]
                                    (onOpen []
-                                     (log/i "onOpen"))
+                                     (log/i "onOpen")
+                                     (swap! wsd-sessions :sessiond handshake))
                                    (onClose [code, reason, initiated-by-remote]
                                      (log/i "onClose"))
                                    (onMessage [message]
@@ -75,8 +78,10 @@
                                    (onPong [pong]
                                      (log/i "onPong"))
                                    (onException [exception]
-                                    (log/i "onException")))]
-                  web-socket) 
+                                     (log/i "onException")
+                                     (log/i exception)
+                                     ))]
+                  web-socket)
                 )
               )]
     wsd
@@ -99,7 +104,8 @@
     (log/i "staring httpd server")
     (.start httpd)
     (log/i "starting wsd server")
-    (.start wsd)
+    ;; starting wsd server with with a negative SOCKET_READ_TIMEOUT that will set no timeout
+    (.start wsd -1)
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
