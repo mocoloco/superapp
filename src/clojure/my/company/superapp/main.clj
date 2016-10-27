@@ -31,6 +31,7 @@
              (res/get-string R$string/your_input_fmt input))
            :long)))
 
+
 (defn init-httpd
   [bind-address port]
   (let [httpd (proxy [NanoHTTPD] [bind-address port]
@@ -59,10 +60,8 @@
     )
   )
 
-(def wsd-sessions (atom {}))
-
 (defn init-wsd 
-  [bind-address port]
+  [bind-address port wsd-sessions]
   (let [wsd (proxy [NanoWSD] [bind-address port]
               (openWebSocket 
                 [handshake]
@@ -70,6 +69,7 @@
                 (let [web-socket (proxy [NanoWSD$WebSocket] [handshake]
                                    (onOpen []
                                      (log/i "onOpen")
+                                     ;; TODO - need to check how to get session-id
                                      (swap! wsd-sessions :sessiond handshake))
                                    (onClose [code, reason, initiated-by-remote]
                                      (log/i "onClose"))
@@ -88,9 +88,58 @@
     )
 )
 
-;;Define httpd and wsg instances as a global variables
-(def httpd (init-httpd "0.0.0.0" 5557))
-(def wsd (init-wsd "0.0.0.0" 5558))
+;; --API-- ;;
+(defprotocol I-HTTPD-WSD
+  "HTTPD and WSD APIs"
+  (init-servers
+    [this])
+  (start-servers
+    [this])
+)
+
+(defrecord HTTPD-WSD
+    ;; :httpd-port     PORT number that will be use for HTTPD server
+    ;; :wsd-port       PORT number that will be use for WSD server
+    ;; :bind-address   IP address for binding both HTTPD and WSD servers
+    ;; :httpd          Reference to httpd instance
+    ;; :wsd            Reference to wsd instance
+    ;; :wsd-sessions   MAP wsc to rooms for easy broadcasing
+
+  [httpd-port wsd-port bind-address httpd wsd wsd-sessions] 
+  I-HTTPD-WSD
+ 
+  (start-servers
+      [this]
+
+    (log/i (str "starting HTTPD server: " bind-address ":" httpd-port))
+    (.start httpd)
+    (log/i (str "starting WSD server: " bind-address ":" wsd-port))
+    (.start wsd -1)
+    )
+)
+
+(defn new-httpd-wsd
+ "Constractor for HTTPD-WSD
+  :httpd-port     PORT number that will be use for HTTPD server
+  :wsd-port       PORT number that will be use for WSD server
+  :bind-address   IP address for binding both HTTPD and WSD servers"
+ 
+ [httpd-port wsd-port bind-address]
+ 
+ (let [wsd-sessions (atom {})]
+
+   (map->HTTPD-WSD{:httpd-port httpd-port
+                                 :wsd-port wsd-port
+                                 :bind-address bind-address
+                                 :wsd-sessions wsd-sessions
+                                 :httpd (init-httpd bind-address httpd-port)
+                                 :wsd (init-wsd bind-address wsd-port wsd-sessions)
+                                 })
+   )
+)
+
+;; Create HTTPD-WSD instance
+(def httpd-wsd (new-httpd-wsd (int 5557) (int 5558) "0.0.0.0"))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
@@ -100,12 +149,9 @@
 
   (onCreate [this bundle]
     (.superOnCreate this bundle)
-    (toast "starting HTTPD server..." :long)
-    (log/i "staring httpd server")
-    (.start httpd)
-    (log/i "starting wsd server")
-    ;; starting wsd server with with a negative SOCKET_READ_TIMEOUT that will set no timeout
-    (.start wsd -1)
+    ;; starting servers
+    (toast "starting HTTPD-WSD servers" :long)
+    (start-servers httpd-wsd)
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
