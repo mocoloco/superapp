@@ -63,11 +63,15 @@
                                    (onOpen []
                                      (log/i "onOpen")
                                      ;; TODO - need to check how to get session-id
-                                     (swap! wsd-sessions :sessiond handshake))
+                                     (swap! wsd-sessions :sessiond this))
                                    (onClose [code, reason, initiated-by-remote]
                                      (log/i "onClose"))
                                    (onMessage [message]
-                                     (log/i "onMessage"))
+                                     (log/i "onMessage")
+                                     (.send this "thanks")
+                                     (dotimes [n 8]
+                                       (.send this (str "sending message:" n)))
+                                     (log/i "done with this session...")
                                    (onPong [pong]
                                      (log/i "onPong"))
                                    (onException [exception]
