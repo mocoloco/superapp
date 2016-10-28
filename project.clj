@@ -14,7 +14,11 @@
   :dependencies [[org.clojure-android/clojure "1.7.0-r4"]
                  [neko/neko "4.0.0-alpha5"]
                  [org.nanohttpd/nanohttpd "2.3.1"]
-                 [org.nanohttpd/nanohttpd-websocket "2.3.1"]]
+                 [org.nanohttpd/nanohttpd-websocket "2.3.1"]
+                 ;; [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
+                 ;; [co.paralleluniverse/quasar-core "0.7.6"]
+                 ;; [co.paralleluniverse/pulsar "0.7.6"]
+                 ]
   :profiles {:default [:dev]
 
              :dev

@@ -6,6 +6,10 @@
               [neko.find-view :refer [find-view]]
               [neko.threading :refer [on-ui]]
               [neko.log :as log]
+              ;; [clojure.core.async
+               ;; :as a
+               ;; :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
+                       ;; alts! alts!! timeout]]
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
@@ -68,10 +72,11 @@
                                      (log/i "onClose"))
                                    (onMessage [message]
                                      (log/i "onMessage")
-                                     (.send this "thanks")
-                                     (dotimes [n 8]
-                                       (.send this (str "sending message:" n)))
-                                     (log/i "done with this session...")
+                                     (.send this "thanks going underground...")
+                                     (on-ui (dotimes [n 8]
+                                              (do (Thread/sleep 3000)
+                                                  (.send this (str "sending message:" n)))))
+                                     (log/i "done with this session..."))
                                    (onPong [pong]
                                      (log/i "onPong"))
                                    (onException [exception]
