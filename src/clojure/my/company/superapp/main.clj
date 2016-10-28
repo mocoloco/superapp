@@ -6,14 +6,11 @@
               [neko.find-view :refer [find-view]]
               [neko.threading :refer [on-ui]]
               [neko.log :as log]
-              ;; [clj-http.client :as client]
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
              fi.iki.elonen.NanoWSD
              fi.iki.elonen.NanoWSD$WebSocket
-             ;; fi.iki.elonen.response.Response
-             ;; org.apache.http.client.HttpClient
              ))
 
 ;; We execute this function to import all subclasses of R class. This gives us
@@ -44,15 +41,11 @@
                     (log/i (str "URI: " uri))
                     (log/i (str "Method: " method))
                     (log/i (str "Headers: " headers))
-                    ;; Testing what happends when I raise an exception: 
-                    ;; Same HTTP error as I get when calling: newFixedLegthReponse
-                    ;; (throw (Exception. "my exception message"))
-                    ;; (.newFixedLengthResponse NanoHTTPD (str msg "</body></html>\n"))
-                    ;; calling static method way 2: (This cause the application to crash
-                    (NanoHTTPD/newFixedLengthResponse (str msg "<h3>URI: " uri "</h3>\n" 
-                                                           "<h3>METHOD: " method "</h3>\n" 
-                                                           "<h3>HEADERS: " headers "</h3>\n" 
-                                                           "</body></html>\n"))
+                    (NanoHTTPD/newFixedLengthResponse 
+                     (str msg "<h3>URI: " uri "</h3>\n" 
+                          "<h3>METHOD: " method "</h3>\n" 
+                          "<h3>HEADERS: " headers "</h3>\n" 
+                          "</body></html>\n"))
                     )
                   )
                 )]
