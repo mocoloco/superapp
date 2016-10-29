@@ -6,6 +6,8 @@
               [neko.find-view :refer [find-view]]
               [neko.threading :refer [on-ui]]
               [neko.log :as log]
+              [neko.ui :as ui]
+              [neko.action-bar :as action-bar :refer [setup-action-bar tab-listener]]
               ;; [clojure.core.async
                ;; :as a
                ;; :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
@@ -112,11 +114,18 @@
  
   (start-servers
       [this]
-
-    (log/i (str "starting HTTPD server: " bind-address ":" httpd-port))
-    (.start httpd)
-    (log/i (str "starting WSD server: " bind-address ":" wsd-port))
-    (.start wsd -1)
+    (if (.isAlive httpd) 
+      (do
+        (toast "starting HTTPD server")
+        (log/i (str "starting HTTPD server: " bind-address ":" httpd-port))
+        (.start httpd))
+      (log/i "HTTPD server is already running..."))
+    (if (.isAlive wsd)
+      (do 
+        (toast "starting wsd server")
+        (log/i (str "starting WSD server: " bind-address ":" wsd-port))
+        (.start wsd -1))
+      (log/i "WSD server is already running"))
     )
 )
 
@@ -151,8 +160,27 @@
 
   (onCreate [this bundle]
     (.superOnCreate this bundle)
+    (setup-action-bar this
+                      {:title "Custom title"
+                       :icon R$drawable/ic_launcher
+                       :display-options [:show-home :show-title :home-as-up]
+                       :subtitle "Custom subtitle"
+                       :navigation-mode :tabs
+                       :tabs [
+                              [:tab 
+                               {:text "Player"
+                                :icon R$drawable/ic_launcher
+                                :tab-listener (tab-listener
+                                               :on-tab-selected (fn [tab ft]
+                                                                  (toast "Player was presed")))}]
+                              [:tab {:text "Settings"
+                                     :icon R$drawable/ic_launcher                                    
+                                     :tab-listener (tab-listener
+                                                    :on-tab-selected (fn [tab ft]
+                                                                       (toast "Settings was presed")))}]]})
+
     ;; starting servers
-    (toast "starting HTTPD-WSD servers" :long)
+    ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
     (neko.debug/keep-screen-on this)
     (on-ui
