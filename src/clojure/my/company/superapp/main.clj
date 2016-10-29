@@ -8,10 +8,10 @@
               [neko.log :as log]
               [neko.ui :as ui]
               [neko.action-bar :as action-bar :refer [setup-action-bar tab-listener]]
-              ;; [clojure.core.async
-               ;; :as a
-               ;; :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
-                       ;; alts! alts!! timeout]]
+              [clojure.core.async
+                :as a
+                :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
+                        alts! alts!! timeout]]
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD

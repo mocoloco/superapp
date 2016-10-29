@@ -8,14 +8,15 @@
 
   :source-paths ["src/clojure" "src"]
   :java-source-paths ["src/java"]
-  :javac-options ["-target" "1.6" "-source" "1.6" "-Xlint:-options"]
-  :plugins [[lein-droid "0.4.4"]]
+  :javac-options ["-target" "1.7" "-source" "1.7" "-Xlint:-options"]
+  :plugins [[lein-droid "0.4.6"]]
 
   :dependencies [[org.clojure-android/clojure "1.7.0-r4"]
                  [neko/neko "4.0.0-alpha5"]
                  [org.nanohttpd/nanohttpd "2.3.1"]
                  [org.nanohttpd/nanohttpd-websocket "2.3.1"]
-                 ;; [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
+;;                 [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
                  ;; [co.paralleluniverse/quasar-core "0.7.6"]
                  ;; [co.paralleluniverse/pulsar "0.7.6"]
                  ]
@@ -45,8 +46,11 @@
 
              :lean
              [:release
-              {:dependencies ^:replace [[org.skummet/clojure "1.7.0-r2"]
-                                        [neko/neko "4.0.0-alpha5"]]
+              {:dependencies ^:replace [[org.skummet/clojure "1.7.0-r4"]
+                                        [neko/neko "4.0.0-alpha5"]
+                                       ;; [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
+                                        [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
+                                       ]
                :exclusions [[org.clojure/clojure]
                             [org.clojure-android/clojure]]
                :jvm-opts ["-Dclojure.compile.ignore-lean-classes=true"]
@@ -58,10 +62,14 @@
             ;; :sdk-path "/home/user/path/to/android-sdk/"
 
             ;; Increase this value if dexer fails with OutOfMemoryException.
-            :dex-opts ["-JXmx4096M" "--incremental"]
+            ;;:dex-opts ["-JXmx4096M" "--incremental"]
+            :dex-opts ["-JXmx4096M"]
+            :multi-dex true
+            :multi-dex-proguard-conf-path "build/proguard-multi-dex.cfg"
 
-            :target-version "23"
-            :aot-exclude-ns ["clojure.parallel" "clojure.core.reducers"
+
+            :target-version "24"
+            :aot-exclude-ns ["clojure.parallel" "clojure.core.reducers" "cljs.core.async.macros" "cljs.core.async.impl.ioc-macros"
                              "cider.nrepl" "cider-nrepl.plugin"
                              "cider.nrepl.middleware.util.java.parser"
                              #"cljs-tooling\..+"]})
