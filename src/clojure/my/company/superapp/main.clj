@@ -12,6 +12,9 @@
                 :as a
                 :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
                         alts! alts!! timeout]]
+              [bidi.bidi :as bidi]
+              [compojure.route :as route]
+              [compojure.core     :refer [GET POST routes]]
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
@@ -151,6 +154,7 @@
 
 ;; Create HTTPD-WSD instance
 (def httpd-wsd (new-httpd-wsd (int 5557) (int 5558) "0.0.0.0"))
+;; (def router (atom {}))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
@@ -182,6 +186,8 @@
     ;; starting servers
     ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
+    (def route ["/index.html" :index])
+    (log/i (bidi/match-route route "/index.html"))
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
