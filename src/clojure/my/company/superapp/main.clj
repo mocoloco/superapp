@@ -75,9 +75,9 @@
                                    (onMessage [message]
                                      (log/i "onMessage")
                                      (.send this "thanks going underground...")
-                                     (on-ui (dotimes [n 8]
+                                     (go (dotimes [n 8]
                                               (do (Thread/sleep 3000)
-                                                  (.send this (str "sending message:" n)))))
+                                                  (.send this (str "[go] sending message:" n)))))
                                      (log/i "done with this session..."))
                                    (onPong [pong]
                                      (log/i "onPong"))
@@ -114,13 +114,13 @@
  
   (start-servers
       [this]
-    (if (.isAlive httpd) 
+    (if-not (.isAlive httpd) 
       (do
         (toast "starting HTTPD server")
         (log/i (str "starting HTTPD server: " bind-address ":" httpd-port))
         (.start httpd))
       (log/i "HTTPD server is already running..."))
-    (if (.isAlive wsd)
+    (if-not (.isAlive wsd)
       (do 
         (toast "starting wsd server")
         (log/i (str "starting WSD server: " bind-address ":" wsd-port))
