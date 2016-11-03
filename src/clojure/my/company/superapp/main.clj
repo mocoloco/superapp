@@ -15,16 +15,44 @@
               [bidi.bidi :as bidi]
               [compojure.route :as route]
               [compojure.core     :refer [GET POST routes]]
+              ;; [clojure.contrib :refer [import-static]]
               )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
              fi.iki.elonen.NanoWSD
              fi.iki.elonen.NanoWSD$WebSocket
-             ))
+             java.util.UUID
+             )
+    )
 
 ;; We execute this function to import all subclasses of R class. This gives us
 ;; access to all application resources.
 (res/import-all)
+
+(defn api-routes
+  []
+  (routes
+  (GET "/" [] 
+       (str "<h1>Im in slash</h2>"))
+  )  
+  )
+
+(defn wrap-exception
+  [f]
+  (fn [session]
+    (try
+      (f session)
+      (catch Exception e
+        (str e)))))
+
+(defn handle-session
+  [session]
+  (-> ((api-routes) session)
+      (wrap-exception)
+      (NanoHTTPD/newFixedLengthResponse))
+)
+ 
+(defn uuid [] (str (UUID/randomUUID)))
 
 (defn notify-from-edit
   "Finds an EditText element with ID ::user-input in the given activity. Gets
@@ -41,6 +69,9 @@
 (defn init-httpd
   [bind-address port]
   (let [httpd (proxy [NanoHTTPD] [bind-address port]
+                (serve-handler [session]
+                  (handle-session session)
+                  )
                 (serve [session]
                   (let [msg "<html><body><h1>Hello from server!</h1>\n<h2>Session info:</h2>"
                         uri (.getUri session)
@@ -77,10 +108,18 @@
                                      (log/i "onClose"))
                                    (onMessage [message]
                                      (log/i "onMessage")
-                                     (.send this "thanks going underground...")
-                                     (go (dotimes [n 8]
-                                              (do (Thread/sleep 3000)
-                                                  (.send this (str "[go] sending message:" n)))))
+                                     (.send this (str "Cookies:" (.getCookies handshake) "\n"
+                                                      "Headers:" (.getHeaders handshake) "\n"
+                                                      "Params:" (.getParameters handshake) "\n"
+                                                      "URI:" (.getUri handshake) "\n"
+                                                      "RemoteAddress:" (.getRemoteIpAddress handshake) "\n"
+                                                      "RemoteName:" (.getRemoteHostName handshake) "\n"
+                                                      ))
+                                     (.send this (str "UUID:" (uuid) "\n"))
+                                     (.send this "[go]ing underground...")
+                                     (go (dotimes [n 3]
+                                              (do (Thread/sleep 2000)
+                                                  (.send this (str "[go] message:" n)))))
                                      (log/i "done with this session..."))
                                    (onPong [pong]
                                      (log/i "onPong"))
