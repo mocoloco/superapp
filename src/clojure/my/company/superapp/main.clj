@@ -8,6 +8,7 @@
               [neko.log :as log]
               [neko.ui :as ui]
               [neko.action-bar :as action-bar :refer [setup-action-bar tab-listener]]
+              ;; [org.clojure.clojure-contrib]
               [clojure.core.async
                 :as a
                 :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
@@ -15,13 +16,15 @@
               [bidi.bidi :as bidi]
               [compojure.route :as route]
               [compojure.core     :refer [GET POST routes]]
-              ;; [clojure.contrib :refer [import-static]]
-              )
+                )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
              fi.iki.elonen.NanoWSD
              fi.iki.elonen.NanoWSD$WebSocket
              java.util.UUID
+             com.couchbase.lite.Manager
+             com.couchbase.lite.android.AndroidContext
+             com.couchbase.lite.util.Log
              )
     )
 
@@ -222,6 +225,7 @@
                                                     :on-tab-selected (fn [tab ft]
                                                                        (toast "Settings was presed")))}]]})
 
+    ;; setup the couchbase database
     ;; starting servers
     ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
