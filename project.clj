@@ -24,7 +24,7 @@
                  [compojure "1.5.1"]
                  ;; [org.clojure/clojure-contrib "1.2.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
-                 ;; [com.couchbase.lite/couchbase-lite-android "1.3.1"]
+                 [com.couchbase.lite/couchbase-lite-android "1.3.1" :extension "aar"]
                 ;; [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
                  ;; [co.paralleluniverse/quasar-core "0.7.6"]
                  ;; [co.paralleluniverse/pulsar "0.7.6"]
