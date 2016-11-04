@@ -12,6 +12,8 @@
   :plugins [[lein-droid "0.4.6"]]
 
   :dependencies [[org.clojure-android/clojure "1.7.0-r4"]
+                 [com.couchbase.lite/couchbase-lite-android-sqlite-custom "1.3.1" :extension "aar"]
+                 [com.couchbase.lite/couchbase-lite-android "1.3.1" :extension "aar" :exclusions [com.couchbase.lite/couchbase-lite-android-sqlite-custom]]
                  [neko/neko "4.0.0-alpha5"]
                  [org.nanohttpd/nanohttpd "2.3.1"]
                  [org.nanohttpd/nanohttpd-websocket "2.3.1"]
@@ -24,7 +26,6 @@
                  [compojure "1.5.1"]
                  ;; [org.clojure/clojure-contrib "1.2.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
-                 [com.couchbase.lite/couchbase-lite-android "1.3.1" :extension "aar"]
                 ;; [org.clojure/core.async "0.2.395" :exclusions [org.clojure/clojure]]
                  ;; [co.paralleluniverse/quasar-core "0.7.6"]
                  ;; [co.paralleluniverse/pulsar "0.7.6"]
