@@ -226,6 +226,19 @@
                                                                        (toast "Settings was presed")))}]]})
 
     ;; setup the couchbase database
+    ;; the problem is that i can not create an instance of AndroidContext due to illeagal agrument.
+    (log/i "testing androidContext")
+    (.AndroidContext (*a))
+    (log/i "creating manager")
+    (def manager (.Manager (.AndroidContext this) (.getField Manager "DEFAULT_OPTIONS")))
+    (log/i "creteing database")
+    (def db-name "hello")
+    (def database (.getDatabase manager db-name))
+    (log/i "creating document")
+    (def document (.createDocument database))
+    (log/i "getting doc-id")
+    (def doc-id (.getId document))
+
     ;; starting servers
     ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
