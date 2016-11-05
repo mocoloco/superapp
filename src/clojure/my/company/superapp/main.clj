@@ -227,10 +227,8 @@
 
     ;; setup the couchbase database
     ;; the problem is that i can not create an instance of AndroidContext due to illeagal agrument.
-    (log/i "testing androidContext")
-    (.AndroidContext (*a))
     (log/i "creating manager")
-    (def manager (.Manager (.AndroidContext this) (.getField Manager "DEFAULT_OPTIONS")))
+    (def manager (Manager. (AndroidContext. (*a)) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
     (log/i "creteing database")
     (def db-name "hello")
     (def database (.getDatabase manager db-name))
