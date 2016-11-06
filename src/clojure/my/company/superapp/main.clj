@@ -138,6 +138,10 @@
     )
 )
 
+;; document updater initator with dedicated update method for updating a document.
+;; update method handles the conflict error itself by re-reading the document, 
+;; then calling your block again with the updated properties, 
+;; and retrying the save. It will keep retrying until there is no conflict
 (defn document-updater
   []
   (let [updater (proxy [Document$DocumentUpdater] []
@@ -214,7 +218,6 @@
 
 ;; Create HTTPD-WSD instance
 (def httpd-wsd (new-httpd-wsd (int 5557) (int 5558) "0.0.0.0"))
-;; (def router (atom {}))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
@@ -245,7 +248,7 @@
 
     ;; setup the couchbase database
     (log/i "creating manager")
-    ;; (*a) and "this" are the same
+    ;; should change (*a) "this" in production, this is easy for REPL
     (def manager (Manager. (AndroidContext. (*a)) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
     (.setStorageType manager "ForestDB")
     (log/i "creteing database")
@@ -265,6 +268,9 @@
     (log/i "updating data using update method hendler")
     (.update document (document-updater))
     (log/i (str "new data after using putProperties: " (.getProperties document)))
+
+    (log/i (str "deleting document: " (.delete document)))
+
     ;; starting servers
     ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
