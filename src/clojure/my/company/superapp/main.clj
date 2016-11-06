@@ -23,6 +23,7 @@
              fi.iki.elonen.NanoWSD$WebSocket
              java.util.UUID
              com.couchbase.lite.Manager
+             com.couchbase.lite.Document$DocumentUpdater
              com.couchbase.lite.android.AndroidContext
              com.couchbase.lite.util.Log
              )
@@ -137,6 +138,23 @@
     )
 )
 
+(defn document-updater
+  []
+  (let [updater (proxy [Document$DocumentUpdater] []
+                  (update
+                    [new-revision]
+                    (log/i "tring to update using update method")
+                    (let [properties (.getUserProperties new-revision)]
+                      (log/i "calling setUserProperties")
+                      (.setUserProperties new-revision 
+                                          (assoc (into {}  properties) 
+                                                 "hello" "using update" "itzik" "was here..."))
+                      true
+                          )))]
+    updater
+    )
+  )
+                    
 ;; --API-- ;;
 (defprotocol I-HTTPD-WSD
   "HTTPD and WSD APIs"
@@ -228,15 +246,25 @@
     ;; setup the couchbase database
     (log/i "creating manager")
     ;; (*a) and "this" are the same
-    (def manager (Manager. (AndroidContext. this) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
+    (def manager (Manager. (AndroidContext. (*a)) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
+    (.setStorageType manager "ForestDB")
     (log/i "creteing database")
-    (def db-name "hello")
+    (def db-name "player")
     (def database (.getDatabase manager db-name))
     (log/i "creating document")
     (def document (.createDocument database))
     (log/i "getting doc-id")
     (def doc-id (.getId document))
+    (.putProperties document {"hello" "[1] this is an hello test couchbase example"})
+    (def data (.getProperties document))
+    (log/i (str "first data: " data))
+    (log/i "updating data using putProperties")
+    (.putProperties document (assoc (into {}  data) "hello" "test" "itzik" "there"))
+    (log/i (str "new data after using putProperties: " (.getProperties document)))
 
+    (log/i "updating data using update method hendler")
+    (.update document (document-updater))
+    (log/i (str "new data after using putProperties: " (.getProperties document)))
     ;; starting servers
     ;; (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)

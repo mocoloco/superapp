@@ -12,6 +12,7 @@
   :plugins [[lein-droid "0.4.6"]]
 
   :dependencies [[org.clojure-android/clojure "1.7.0-r4"]
+                 [com.couchbase.lite/couchbase-lite-android-forestdb "1.3.1" :extension "aar"]
                  [com.couchbase.lite/couchbase-lite-android-sqlite-custom "1.3.1" :extension "aar"]
                  [com.couchbase.lite/couchbase-lite-java-core "1.3.1"]
                  [com.couchbase.lite/couchbase-lite-android "1.3.1" :extension "aar" :exclusions [com.couchbase.lite/couchbase-lite-android-sqlite-custom]]
