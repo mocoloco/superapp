@@ -23,6 +23,7 @@
              fi.iki.elonen.NanoWSD$WebSocket
              java.util.UUID
              com.couchbase.lite.Manager
+             com.couchbase.lite.Mapper
              com.couchbase.lite.Document$DocumentUpdater
              com.couchbase.lite.android.AndroidContext
              com.couchbase.lite.util.Log
@@ -152,13 +153,26 @@
                       (log/i "calling setUserProperties")
                       (.setUserProperties new-revision 
                                           (assoc (into {}  properties) 
-                                                 "hello" "using update" "itzik" "was here..."))
+                                                 "name" "loco" "phone" "03649556"))
                       true
                           )))]
     updater
     )
   )
-                    
+
+(defn document-mapper
+  []
+  (let [mapper (proxy [Mapper] []
+                 (map 
+                   [document, emitter]
+                   (log/i "testing mapper view function")
+                   (log/i (str "mapper:" document))
+                   (.emit emitter (get document "phone") (get document "name"))
+                   ))]
+    mapper
+    )
+  )
+
 ;; --API-- ;;
 (defprotocol I-HTTPD-WSD
   "HTTPD and WSD APIs"
@@ -252,17 +266,20 @@
     (def manager (Manager. (AndroidContext. (*a)) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
     (.setStorageType manager "ForestDB")
     (log/i "creteing database")
-    (def db-name "player")
+    (def db-name "phones")
     (def database (.getDatabase manager db-name))
     (log/i "creating document")
     (def document (.createDocument database))
+    ;; Views and mappers
+    (def new-view (.getView database "test"))
+    (.setMap new-view (document-mapper) "1")
     (log/i "getting doc-id")
     (def doc-id (.getId document))
-    (.putProperties document {"hello" "[1] this is an hello test couchbase example"})
+    (.putProperties document {"name" "bizo" "phone" "0505919161"})
     (def data (.getProperties document))
     (log/i (str "first data: " data))
     (log/i "updating data using putProperties")
-    (.putProperties document (assoc (into {}  data) "hello" "test" "itzik" "there"))
+    (.putProperties document (assoc (into {}  data) "name" "itzik" "phone" "0528543649"))
     (log/i (str "new data after using putProperties: " (.getProperties document)))
 
     (log/i "updating data using update method hendler")
@@ -270,9 +287,17 @@
     (log/i (str "new data after using putProperties: " (.getProperties document)))
 
     (log/i (str "deleting document: " (.delete document)))
+    ;; this is how you get conflicts and revision histories
+    ;; (.getCurrentRevision document)
+    ;; (.getLeafRevisions document)
+    ;; (.putProperties document (assoc (into {} data) "bizo" "is here"))
+    ;; (.getProperties (.getDocument (first (.getConflictingRevisions document))))
+    ;; (.getRevisionHistory document)
+    ;; (def mapper (.getMap new-view))
+    ;; (.map mapper {} nil)
 
     ;; starting servers
-    ;; (toast "starting HTTPD-WSD servers" :long)
+    (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
     (def route ["/index.html" :index])
     (log/i (bidi/match-route route "/index.html"))
