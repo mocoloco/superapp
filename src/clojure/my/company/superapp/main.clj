@@ -24,6 +24,7 @@
              java.util.UUID
              com.couchbase.lite.Manager
              com.couchbase.lite.Mapper
+             com.couchbase.lite.Query
              com.couchbase.lite.Document$DocumentUpdater
              com.couchbase.lite.android.AndroidContext
              com.couchbase.lite.util.Log
@@ -153,7 +154,7 @@
                       (log/i "calling setUserProperties")
                       (.setUserProperties new-revision 
                                           (assoc (into {}  properties) 
-                                                 "name" "loco" "phone" "03649556"))
+                                                 "type" "person" "name" "loco" "phone" "03649556"))
                       true
                           )))]
     updater
@@ -165,9 +166,8 @@
   (let [mapper (proxy [Mapper] []
                  (map 
                    [document, emitter]
-                   (log/i "testing mapper view function")
-                   (log/i (str "mapper:" document))
-                   (.emit emitter (get document "phone") (get document "name"))
+                   (log/i (str "Mapper:" document))
+                   (.emit emitter ["stam" (get document "phone")] (get document "name"))
                    ))]
     mapper
     )
@@ -266,26 +266,26 @@
     (def manager (Manager. (AndroidContext. (*a)) (.get (.getField Manager "DEFAULT_OPTIONS") nil)))
     (.setStorageType manager "ForestDB")
     (log/i "creteing database")
-    (def db-name "phones")
+    (def db-name "persons")
     (def database (.getDatabase manager db-name))
     (log/i "creating document")
     (def document (.createDocument database))
     ;; Views and mappers
-    (def new-view (.getView database "test"))
-    (.setMap new-view (document-mapper) "1")
+    (def new-view (.getView database "persons"))
+    (.setMap new-view (document-mapper) "2")
     (log/i "getting doc-id")
     (def doc-id (.getId document))
-    (.putProperties document {"name" "bizo" "phone" "0505919161"})
+    (.putProperties document {"type" "person" "name" "bizo" "phone" "0505919161"})
     (def data (.getProperties document))
     (log/i (str "first data: " data))
     (log/i "updating data using putProperties")
-    (.putProperties document (assoc (into {}  data) "name" "itzik" "phone" "0528543649"))
+    (.putProperties document (assoc (into {}  data) "type" "person" "name" "itzik" "phone" "0528543649"))
     (log/i (str "new data after using putProperties: " (.getProperties document)))
 
     (log/i "updating data using update method hendler")
     (.update document (document-updater))
     (log/i (str "new data after using putProperties: " (.getProperties document)))
-
+    
     (log/i (str "deleting document: " (.delete document)))
     ;; this is how you get conflicts and revision histories
     ;; (.getCurrentRevision document)
@@ -295,7 +295,28 @@
     ;; (.getRevisionHistory document)
     ;; (def mapper (.getMap new-view))
     ;; (.map mapper {} nil)
+    
+    ;; load the database with more persons
+    (loop [name 100 phone 6000]
+      (if (= name 200) nil
+          (do
+            (let [document (.createDocument database)]
+              (.putProperties document {"type" "person" 
+                                        "name" (str "AA" name) 
+                                        "phone" phone})
+            (recur (inc name) (inc phone))))))
 
+    ;; quering the database
+    (def query (.createQuery (.getView database "persons")))
+    (.setLimit query 2)
+    ;; (.setStartKey query "sdfsdfas")
+    (def result (.run query))
+    (loop [] 
+      (if-not (.hasNext result)
+        (log/i "done with qruey...")
+        (do
+          (log/i (str "qruey: " (.next result)))
+          (recur))))
     ;; starting servers
     (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
