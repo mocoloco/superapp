@@ -345,7 +345,13 @@
     ;; caching tests
     (def info (Runtime/getRuntime))
     (log/i "free memory in the device:" (.freeMemory info) "with max memory of:" (.maxMemory info) "and total memory:" (.totalMemory info))
-    (Environment$getExternalStorageState
+    
+    (log/i "Environment/getExternalStorageState:" (Environment/getExternalStorageState))
+    (log/i "Environment/getDataDirectory:" (Environment/getDataDirectory))
+    (log/i "Environment/MEDIA_MOUNTED:" (.get (.getField Environment "MEDIA_MOUNTED") nil))
+    (log/i "Environment/getExternalStorageDirectory:" (Environment/getExternalStorageDirectory))
+    (log/i "Activity absolte path:" (.getAbsolutePath (.getFilesDir (*a))))
+    (log/i "Activity absolte path state:" (Environment/getExternalStorageState (.getFilesDir (*a))))
     ;; needs to add to intent main activity the "EXTRA_ID_CACHE, AND SIZES"
     (def main-intent (.getIntent (*a)))
     ;; (def mCacheId (.getStringExtra main-intent "EXTRA_ID_CACHE"))
