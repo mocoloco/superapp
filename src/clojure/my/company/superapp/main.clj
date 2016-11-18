@@ -354,7 +354,7 @@
     ;; Using default jsonSerializer
     (def defaultmCache 
       (->
-       (Builder. mCacheId 1 String)
+       (Builder. mCacheId 1 HashMap)
        (.enableLog)
        (.useSerializerInRam mRamCacheSize defaultjsonSerializer)
        (.useSerializerInDisk mDiskCacheSize, true, defaultjsonSerializer, (*a))
