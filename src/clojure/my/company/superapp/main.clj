@@ -35,6 +35,7 @@
              com.vincentbrison.openlibraries.android.dualcache.Builder
              com.vincentbrison.openlibraries.android.dualcache.CacheSerializer
              com.vincentbrison.openlibraries.android.dualcache.JsonSerializer
+             android.os.Environment
              )
     )
 
@@ -344,7 +345,7 @@
     ;; caching tests
     (def info (Runtime/getRuntime))
     (log/i "free memory in the device:" (.freeMemory info) "with max memory of:" (.maxMemory info) "and total memory:" (.totalMemory info))
-    
+    (Environment$getExternalStorageState
     ;; needs to add to intent main activity the "EXTRA_ID_CACHE, AND SIZES"
     (def main-intent (.getIntent (*a)))
     ;; (def mCacheId (.getStringExtra main-intent "EXTRA_ID_CACHE"))
