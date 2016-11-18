@@ -24,6 +24,7 @@
              fi.iki.elonen.NanoWSD$WebSocket
              java.util.UUID
              java.util.HashMap
+             java.lang.Runtime
              com.couchbase.lite.Manager
              com.couchbase.lite.Mapper
              com.couchbase.lite.Query
@@ -341,10 +342,16 @@
 
 
     ;; caching tests
+    (def info (Runtime/getRuntime))
+    (log/i "free memory in the device:" (.freeMemory info) "with max memory of:" (.maxMemory info) "and total memory:" (.totalMemory info))
+    
+    ;; needs to add to intent main activity the "EXTRA_ID_CACHE, AND SIZES"
+    (def main-intent (.getIntent (*a)))
+    ;; (def mCacheId (.getStringExtra main-intent "EXTRA_ID_CACHE"))
     (def mCacheId (uuid))
     ;; TODO - needs to check how to get disk-size and memory using the Android API
-    (def mDiskCacheSize 1000)
-    (def mRamCacheSize 500)
+    (def mDiskCacheSize (.getIntExtra main-intent "EXTRA_DISK_CACHE_SIZE" 100))
+    (def mRamCacheSize (.getIntExtra main-intent "EXTRA_RAM_CACHE_SIZE", 50))
     ;; default serializer
     (def defaultjsonSerializer (JsonSerializer. HashMap))
     ;; Testing default serializer
