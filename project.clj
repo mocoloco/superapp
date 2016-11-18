@@ -20,6 +20,9 @@
                  [org.nanohttpd/nanohttpd "2.3.1"]
                  [org.nanohttpd/nanohttpd-websocket "2.3.1"]
                  ;; [prismatic/schema "1.1.3"]
+                 [com.vincentbrison.openlibraries.android/dualcache "3.0.0"]
+                 [com.vincentbrison.openlibraries.android/dualcache-jsonserializer "3.0.0"]
+                 [com.vincentbrison.openlibraries.android/dualcache-serializerinterface "3.0.0"]
                  [org.clojure/test.check "0.9.0"]
                  [javax.servlet/javax.servlet-api "3.1.0"]
                  [potemkin "0.4.3"]
@@ -28,6 +31,7 @@
                  [compojure "1.5.1"]
                  ;; [org.clojure/clojure-contrib "1.2.0"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
+                 [org.clojure/data.json "0.2.6"]
                  ]
   :profiles {:default [:dev]
 

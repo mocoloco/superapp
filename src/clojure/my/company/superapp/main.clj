@@ -9,6 +9,7 @@
               [neko.ui :as ui]
               [neko.action-bar :as action-bar :refer [setup-action-bar tab-listener]]
               ;; [org.clojure.clojure-contrib]
+              [clojure.data.json :as json]
               [clojure.core.async
                 :as a
                 :refer [>! <! >!! <!! go chan go-loop put! tap mult close! thread
@@ -22,18 +23,25 @@
              fi.iki.elonen.NanoWSD
              fi.iki.elonen.NanoWSD$WebSocket
              java.util.UUID
+             java.util.HashMap
              com.couchbase.lite.Manager
              com.couchbase.lite.Mapper
              com.couchbase.lite.Query
              com.couchbase.lite.Document$DocumentUpdater
              com.couchbase.lite.android.AndroidContext
              com.couchbase.lite.util.Log
+             com.vincentbrison.openlibraries.android.dualcache.DualCache
+             com.vincentbrison.openlibraries.android.dualcache.Builder
+             com.vincentbrison.openlibraries.android.dualcache.CacheSerializer
+             com.vincentbrison.openlibraries.android.dualcache.JsonSerializer
              )
     )
 
 ;; We execute this function to import all subclasses of R class. This gives us
 ;; access to all application resources.
 (res/import-all)
+
+;; TODO - need to check deftype and reify instead of proxy!!!
 
 (defn api-routes
   []
@@ -71,7 +79,20 @@
              (res/get-string R$string/your_input_fmt input))
            :long)))
 
+(deftype JSI []
+  CacheSerializer
+  (toString [this obj] 
+    (log/i "CustomCacheSerializer: toString: " obj)
+    (json/write-str obj)
+    )
+  (fromString [this data] 
+    (log/i "CustomCacheSerializer: fromString: " data)
+    (json/read-str data)
+    )
+  )
 
+;; (Def jsonSerializer (JsonSerializer. java.util.Map))
+;; (.fromString jsonSerializer "{\"name\":\"Bob\", \"age\":13}")
 (defn init-httpd
   [bind-address port]
   (let [httpd (proxy [NanoHTTPD] [bind-address port]
@@ -167,7 +188,7 @@
                  (map 
                    [document, emitter]
                    (log/i (str "Mapper:" document))
-                   (.emit emitter ["stam" (get document "phone")] (get document "name"))
+                   (.emit emitter (get document "phone") (get document "name"))
                    ))]
     mapper
     )
@@ -272,7 +293,7 @@
     (def document (.createDocument database))
     ;; Views and mappers
     (def new-view (.getView database "persons"))
-    (.setMap new-view (document-mapper) "2")
+    (.setMap new-view (document-mapper) "3")
     (log/i "getting doc-id")
     (def doc-id (.getId document))
     (.putProperties document {"type" "person" "name" "bizo" "phone" "0505919161"})
@@ -297,7 +318,7 @@
     ;; (.map mapper {} nil)
     
     ;; load the database with more persons
-    (loop [name 100 phone 6000]
+    (loop [name 100 phone 8000]
       (if (= name 200) nil
           (do
             (let [document (.createDocument database)]
@@ -309,7 +330,7 @@
     ;; quering the database
     (def query (.createQuery (.getView database "persons")))
     (.setLimit query 2)
-    ;; (.setStartKey query "sdfsdfas")
+    (.setStartKey query "052")
     (def result (.run query))
     (loop [] 
       (if-not (.hasNext result)
@@ -317,6 +338,47 @@
         (do
           (log/i (str "qruey: " (.next result)))
           (recur))))
+
+
+    ;; caching tests
+    (def mCacheId (uuid))
+    ;; TODO - needs to check how to get disk-size and memory using the Android API
+    (def mDiskCacheSize 1000)
+    (def mRamCacheSize 500)
+    ;; default serializer
+    (def defaultjsonSerializer (JsonSerializer. HashMap))
+    ;; Testing default serializer
+    ;; (def to-string (.toString defaultjsonSerializer (HashMap. {"test" "benon"})))
+    ;; (.fromString defaultjsonSerializer to-string)
+
+    ;; Using default jsonSerializer
+    (def defaultmCache 
+      (->
+       (Builder. mCacheId 1 String)
+       (.enableLog)
+       (.useSerializerInRam mRamCacheSize defaultjsonSerializer)
+       (.useSerializerInDisk mDiskCacheSize, true, defaultjsonSerializer, (*a))
+       (.build)
+       ))
+
+    ;; Using custom jsom serializer
+    (def jsonSerializer (JSI.))
+    (def mCache 
+      (->
+       (Builder. mCacheId 1 String)
+       (.enableLog)
+       (.useSerializerInRam mRamCacheSize jsonSerializer)
+       (.useSerializerInDisk mDiskCacheSize, true, jsonSerializer, (*a))
+       (.build)
+       ))
+
+    ;; Read and write from both caches
+    (log/i "writing json to both custom and default cache")
+    (.put mCache "json" {"custom" "loco" "test" "passed"})
+    (.put defaultmCache "json" (HashMap.{"default" "using HashMap"}))
+    (log/i "reading json from custom cache:" (.get mCache "json"))
+    (log/i "reading json from default cache:" (.get defaultmCache "json"))
+
     ;; starting servers
     (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
