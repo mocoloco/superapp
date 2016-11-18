@@ -36,6 +36,7 @@
              com.vincentbrison.openlibraries.android.dualcache.CacheSerializer
              com.vincentbrison.openlibraries.android.dualcache.JsonSerializer
              android.os.Environment
+             android.os.StatFs
              )
     )
 
@@ -351,7 +352,38 @@
     (log/i "Environment/MEDIA_MOUNTED:" (.get (.getField Environment "MEDIA_MOUNTED") nil))
     (log/i "Environment/getExternalStorageDirectory:" (Environment/getExternalStorageDirectory))
     (log/i "Activity absolte path:" (.getAbsolutePath (.getFilesDir (*a))))
+    (log/i "files in activity path:" (map #(.getPath %) (file-seq (.getFilesDir (*a)))))
     (log/i "Activity absolte path state:" (Environment/getExternalStorageState (.getFilesDir (*a))))
+    (log/i "Android OS root path:" (Environment/getRootDirectory))
+    (def system-path (StatFs. (.getPath (Environment/getRootDirectory))))
+    ;; The number of bytes that are free on the file system and available 
+    ;; to applications. 
+    (log/i "getAvailableBytes - /system:" (.getAvailableBytes system-path))
+    ;; The number of bytes that are free on the file system, 
+    ;; including reserved blocks (that are not available to normal applications). 
+    (log/i "getFreeBytes - /system:" (.getFreeBytes system-path))
+    ;; The total number of bytes supported by the file system. 
+    (log/i "getTotalBytes - /system:" (.getTotalBytes system-path))
+    (def system-data (StatFs. (.getPath (Environment/getExternalStorageDirectory))))
+    ;; The number of bytes that are free on the file system and available 
+    ;; to applications. 
+    (log/i "getAvailableBytes - /data:" (.getAvailableBytes system-data))
+    ;; The number of bytes that are free on the file system, 
+    ;; including reserved blocks (that are not available to normal applications). 
+    (log/i "getFreeBytes - /data:" (.getFreeBytes system-data))
+    ;; The total number of bytes supported by the file system. 
+    (log/i "getTotalBytes - /data:" (.getTotalBytes system-data))
+    (def app-path (.getAbsolutePath (.getFilesDir (*a))))
+    (def system-app (StatFs. app-path))
+    ;; The number of bytes that are free on the file system and available 
+    ;; to applications. 
+    (log/i "getAvailableBytes -" app-path":" (.getAvailableBytes system-app))
+    ;; The number of bytes that are free on the file system, 
+    ;; including reserved blocks (that are not available to normal applications). 
+    (log/i "getFreeBytes -" app-path ":" (.getFreeBytes system-app))
+    ;; The total number of bytes supported by the file system. 
+    (log/i "getTotalBytes -" app-path ":" (.getTotalBytes system-app))
+
     ;; needs to add to intent main activity the "EXTRA_ID_CACHE, AND SIZES"
     (def main-intent (.getIntent (*a)))
     ;; (def mCacheId (.getStringExtra main-intent "EXTRA_ID_CACHE"))
