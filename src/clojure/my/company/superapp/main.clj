@@ -94,8 +94,6 @@
     )
   )
 
-;; (Def jsonSerializer (JsonSerializer. java.util.Map))
-;; (.fromString jsonSerializer "{\"name\":\"Bob\", \"age\":13}")
 (defn init-httpd
   [bind-address port]
   (let [httpd (proxy [NanoHTTPD] [bind-address port]
