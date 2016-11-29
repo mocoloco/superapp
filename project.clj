@@ -19,7 +19,7 @@
                  [neko/neko "4.0.0-alpha5"]
                  [org.nanohttpd/nanohttpd "2.3.1"]
                  [org.nanohttpd/nanohttpd-websocket "2.3.1"]
-                 ;; [prismatic/schema "1.1.3"]
+                 [com.android.support/support-v4 "21.0.0" :extension "aar"]
                  [com.vincentbrison.openlibraries.android/dualcache "3.0.0"]
                  [com.vincentbrison.openlibraries.android/dualcache-jsonserializer "3.0.0"]
                  [com.vincentbrison.openlibraries.android/dualcache-serializerinterface "3.0.0"]

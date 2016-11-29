@@ -7,7 +7,9 @@
               [neko.threading :refer [on-ui]]
               [neko.log :as log]
               [neko.ui :as ui]
+              [neko.intent :as intent]
               [neko.action-bar :as action-bar :refer [setup-action-bar tab-listener]]
+              [net.clandroid.service :as service]
               ;; [org.clojure.clojure-contrib]
               [clojure.data.json :as json]
               [clojure.core.async
@@ -255,6 +257,27 @@
 ;; Create HTTPD-WSD instance
 (def httpd-wsd (new-httpd-wsd (int 5557) (int 5558) "0.0.0.0"))
 
+(service/defservice my.company.superapp.MainService
+  :def main-servcie
+  :on-create (fn [^android.app.Service this intent flags start-id]
+                      (log/i "MOCOLOCO: player service created!")
+                      (log/i (str "this:" this)))
+
+  :on-destroy (fn [^android.app.Service this]
+                (log/i "MOCOLOCO: player service destroied"))
+  )
+
+(service/defservice my.company.superapp.SecService
+  :def sec-service
+  :on-start-command (fn [^android.app.Service this itent flags start-id]
+                      (log/i "MOCOLOCO: second service created!")
+                      (log/i (str "intent:" intent))
+                      (log/i (str "falgs:" flags))
+                      (log/i (str "start-id" start-id))
+                      )
+  :on-destroy (fn [^android.app.Service this intent flags start-id]
+                (log/i "MOCOLOCO: second service destoied")))
+
 ;; This is how an Activity is defined. We create one and specify its onCreate
 ;; method. Inside we create a user interface that consists of an edit and a
 ;; button. We also give set callback to the button.
@@ -282,6 +305,9 @@
                                                     :on-tab-selected (fn [tab ft]
                                                                        (toast "Settings was presed")))}]]})
 
+    (comment
+    ;; manually invoke the main service
+    (intent/intent (*a) 'my.company.superapp.MainService {})
     ;; setup the couchbase database
     (log/i "creating manager")
     ;; should change (*a) "this" in production, this is easy for REPL
@@ -427,7 +453,7 @@
     (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
     (def route ["/index.html" :index])
-    (log/i (bidi/match-route route "/index.html"))
+    (log/i (bidi/match-route route "/index.html")))
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
