@@ -21,6 +21,7 @@
               [compojure.core     :refer [GET POST routes]]
                 )
     (:import android.widget.EditText
+             android.app.ActivityManager
              fi.iki.elonen.NanoHTTPD
              fi.iki.elonen.NanoWSD
              fi.iki.elonen.NanoWSD$WebSocket
@@ -259,7 +260,7 @@
 
 (service/defservice my.company.superapp.MainService
   :def main-servcie
-  :on-create (fn [^android.app.Service this intent flags start-id]
+  :on-create (fn [^android.app.Service this]
                       (log/i "MOCOLOCO: player service created!")
                       (log/i (str "this:" this)))
 
@@ -275,7 +276,7 @@
                       (log/i (str "falgs:" flags))
                       (log/i (str "start-id" start-id))
                       )
-  :on-destroy (fn [^android.app.Service this intent flags start-id]
+  :on-destroy (fn [^android.app.Service this]
                 (log/i "MOCOLOCO: second service destoied")))
 
 ;; This is how an Activity is defined. We create one and specify its onCreate
@@ -307,7 +308,12 @@
 
     (comment
     ;; manually invoke the main service
-    (intent/intent (*a) 'my.company.superapp.MainService {})
+    
+    (def i (intent/intent (*a) 'my.company.superapp.SecService {}))
+    (def s (intent/intent (*a) 'my.company.superapp.MainService {}))
+    (.startService (*a) i)
+    (.startService (*a) s)
+    ;; (service/start-service (*a) "my.company.superapp.SecService")
     ;; setup the couchbase database
     (log/i "creating manager")
     ;; should change (*a) "this" in production, this is easy for REPL

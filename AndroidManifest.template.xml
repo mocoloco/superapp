@@ -24,7 +24,7 @@
         <category android:name='android.intent.category.DEFAULT'/>
       </intent-filter>
     </activity>
-    <service android:name="my.company.superapp.SecService"/>
+    <service android:name=".SecService"/>
     <service android:name="my.company.superapp.MainService">
       <intent-filter>
         <action android:name='my.company.superapp.MainService'/>
