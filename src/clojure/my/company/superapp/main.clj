@@ -311,9 +311,11 @@
     
     (def i (intent/intent (*a) 'my.company.superapp.SecService {}))
     (def s (intent/intent (*a) 'my.company.superapp.MainService {}))
+    ;; using activity contex method...
     (.startService (*a) i)
     (.startService (*a) s)
-    ;; (service/start-service (*a) "my.company.superapp.SecService")
+    ;; Using service macro 
+    (service/start-service-unbound (*a) "my.company.superapp.main.SecService")
     ;; setup the couchbase database
     (log/i "creating manager")
     ;; should change (*a) "this" in production, this is easy for REPL
