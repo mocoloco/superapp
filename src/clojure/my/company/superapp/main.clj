@@ -283,18 +283,11 @@
                                      :tab-listener (tab-listener
                                                     :on-tab-selected (fn [tab ft]
                                                                        (toast "Settings was presed")))}]]})
+
+    ;; Start main service the will use for httpd ...
     (log/i "MOCO starting main-service...")
     (service/start-service-unbound (*a) stest/main-service-name)
-    (comment
-    ;; manually invoke the main service
-    
-    ;; (def i (intent/intent (*a) 'my.company.superapp.SecService {}))
-    ;; (def s (intent/intent (*a) 'my.company.superapp.MainService {}))
-    ;; using activity contex method...
-    ;; (.startService (*a) i)
-    ;; (.startService (*a) s)
-    ;; Using service macro 
-    ;; (service/start-service-unbound (*a) "my.company.superapp.SecService")
+
     ;; setup the couchbase database
     (log/i "creating manager")
     ;; should change (*a) "this" in production, this is easy for REPL
@@ -440,7 +433,7 @@
     (toast "starting HTTPD-WSD servers" :long)
     (start-servers httpd-wsd)
     (def route ["/index.html" :index])
-    (log/i (bidi/match-route route "/index.html")))
+    (log/i (bidi/match-route route "/index.html"))
     (neko.debug/keep-screen-on this)
     (on-ui
       (set-content-view! (*a)
