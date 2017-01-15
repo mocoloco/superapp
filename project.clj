@@ -33,6 +33,7 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha" :exclusions [org.clojure/clojure]]
                  [org.clojure/data.json "0.2.6"]
                  [com.stuartsierra/component "0.3.2"]
+                 [org.clojure/tools.namespace "0.2.11"]
                  ]
   :profiles {:default [:dev]
 
