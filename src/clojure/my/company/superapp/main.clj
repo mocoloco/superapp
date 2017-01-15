@@ -19,6 +19,9 @@
               [bidi.bidi :as bidi]
               [compojure.route :as route]
               [compojure.core     :refer [GET POST routes]]
+              ;; Component:
+              [com.stuartsierra.component :as component]
+              ;; [clojure.tools.namespace.repl :refer (refresh)]
                 )
     (:import android.widget.EditText
              fi.iki.elonen.NanoHTTPD
